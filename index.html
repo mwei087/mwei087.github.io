@@ -12,6 +12,9 @@ style="border:1px solid #000000;">
 
 </body>
 <script>
+alert("Start Game?")
+var high = 0;
+var strawcount = 0;
 var start = new Date();
 var vectX = function(x1, y1, x2, y2){
 var vecX = x1 - x2;
@@ -19,7 +22,7 @@ var vecY = y1 - y2;
 var distance = Math.sqrt(((vecX)*(vecX)) + ((vecY)*(vecY)));
 var uxval = vecX/distance; 
 var uyval = vecY/distance;
-var mxval= uxval * 11; 
+var mxval= uxval * 10; 
 return mxval;
 };
 var vectY = function(x1, y1, x2, y2){
@@ -28,7 +31,7 @@ var vecY = y1 - y2;
 var distance = Math.sqrt(((vecX)*(vecX)) + ((vecY)*(vecY)));
 var uxval = vecX/distance; 
 var uyval = vecY/distance;
-var myval= uyval *11;
+var myval= uyval *10;
 return myval;
 };
 var maintrack = false;
@@ -39,6 +42,7 @@ var c = document.getElementById("myCanvas");
 var ctx= c.getContext("2d");
 ctx.beginPath();
 ctx.clearRect(0,0,500,500);
+straw.draw();
 var circlex = circ.xcorc();
 var circley = circ.ycorc();
 var recx = rectangle.xcor();
@@ -46,38 +50,65 @@ var recy = rectangle.ycor();
 var xvalue = vectX(circlex, circley, recx, recy);
 var yvalue = vectY(circlex, circley, recx, recy);
 rectangle.drawRect(xvalue, yvalue);
-circ.drawCircle(0,0,0)
+circ.drawCircle(0,0,0);
 if(!track){
 var vecX = circlex - recx ;
 var vecY = circley - recy ;
 var distance = Math.sqrt(((vecX)*(vecX)) + ((vecY)*(vecY)));
 if (distance <= 50){
 track = true;
-var elapsed = new Date() - start;
+var elapsed = (strawcount*100) - ((new Date() - start)/1000);
+if (elapsed > high){
+  high = elapsed;
+}
+if(elapsed < 0) {elapsed = 0;}
 alert("You died! Score = " +elapsed);
 var ask =confirm("Play again?");
 if (ask){
+ straw.random();
 track = false;
 ctx.clearRect(0, 0, 500, 500);
+straw.draw();
 rectangle.drawRect(-recx+50, -recy+50);
 circ.drawCircle(-circlex + 150,-circley+ 200,0)
+strawcount = 0;
 start = new Date();
-
 }
 else
 {
   maintrack = true;
   ctx.clearRect(0, 0, 500, 500);
 ctx.font="50px Georgia";
+ctx.fillStyle ="red";
 ctx.fillText("Game Over!",10,50);
-
+ctx.font="30px Georgia";
+ctx.fillText("High Score: " + high, 10, 100);
 }
 }
 }
 }
 }
 ,100);
+setInterval(function(){
+var c = document.getElementById("myCanvas");
+var ctx= c.getContext("2d");
+ctx.beginPath();
+var circlex = circ.xcorc();
+var circley = circ.ycorc();
+var vecX = circlex- (straw.x +10);
+var vecY = circley - (straw.y +10);
+var dist = Math.sqrt(((vecX)*(vecX)) + ((vecY)*(vecY)));
+if (dist < 30){
+ctx.clearRect(0,0,500,500);
+straw.random();
+straw.draw();
+circ.drawCircle(0, 0, 0);
+rectangle.drawRect(0,0);
+strawcount++;
+}
 
+}
+,50);
 function Rect(xval, yval, length, width){
 var c = document.getElementById("myCanvas");
 var ctx= c.getContext("2d");
@@ -99,17 +130,33 @@ ctx.closePath();
 ctx.beginPath();
 ctx.strokeStyle="blue";
 ctx.stroke();
-
-
 };
 }
+function Strawberry(){
+var c = document.getElementById("myCanvas");
+var ctx= c.getContext("2d");
+ctx.beginPath();
+this.x = 0;
+this.y = 0;
+Strawberry.prototype.random = function(){
+this.x = Math.floor((Math.random() * 485) + 1);
+this.y = Math.floor((Math.random() * 485) + 1);
+};
+Strawberry.prototype.draw = function(){
+var img = new Image();
+img.src = "http://img2.wikia.nocookie.net/__cb20110722063144/farmville/images/0/00/Super_Strawberry-icon.png";
+ctx.drawImage(img, this.x, this.y, 25, 25);
+};
+}
+var straw = new Strawberry();
+straw.random();
+straw.draw();
 var rectangle = new Rect(20, 20, 50, 50); 
 rectangle.drawRect(0, 0);
 function Circle(x, y, radius, color){
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 ctx.beginPath();
-
 var col = color
 Circle.prototype.xcorc = function(){
 return x;
@@ -122,8 +169,6 @@ x = x+a;
 y= y+b;
 r = radius +c
 ctx.arc(x,y,radius,0,2*Math.PI);
-//ctx.stroke();
-
       ctx.fillStyle = col;
       ctx.fill();
       ctx.lineWidth = 5;
@@ -135,8 +180,6 @@ ctx.beginPath();
 };
 var circ = new Circle(100, 150, 20, '#FF0000');
 circ.drawCircle(50, 50, 0);
-//var circ2 = new Circle(200, 200, 30, 'magenta');
-//var circ3 = new Circle(150, 50, 25, 'blue');
 
 document.onkeydown = function(e) {
 var c = document.getElementById("myCanvas");
@@ -152,7 +195,6 @@ if (!maintrack)
             circ.drawCircle(-5, 0, 0);
              }
             else{circ.drawCircle(0, 0, 0);}
-
             break;
         case 38:
             console.log("up");
@@ -174,19 +216,14 @@ if (!maintrack)
            if (circ.ycorc() <= 500){
            circ.drawCircle(0, 5, 0);}
             else{circ.drawCircle(0, 0, 0);}
-
             break;
 }}
+straw.draw();
 rectangle.drawRect(0, 0);
     
 }; 
 
 
-/*var c = document.getElementById("myCanvas");
-var ctx = c.getContext("2d");
-ctx.beginPath();
-ctx.arc(50,50,50,0,2*Math.PI);
-ctx.stroke(); */
 </script>
 
 </html>
